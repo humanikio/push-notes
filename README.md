@@ -64,6 +64,44 @@ ruby bin/push.rb --only api    # just one repo
 - Stops if the remote branch has commits you do not have
 - Lowercases notes and strips trailer lines such as `Co-Authored-By`
 
+## What it runs and sends
+
+### Programs the mod runs, and why
+
+The pane runs one program: the plugin's own script, through `ruby` found on your PATH. The full command is
+
+```
+/usr/bin/env ruby <plugin folder>/bin/push.rb <mode>
+```
+
+where `<mode>` is one of these fixed sets of arguments, depending on what you pressed:
+
+| You did | It runs `push.rb` with | What that does |
+|---|---|---|
+| opened the pane, pressed refresh, or edited `push-notes.yaml` in the chat | `--plan-json` | reads the config, each repo's git state and the signed-in GitHub account; changes nothing |
+| saved a note | `--set-note <repo name> <your note>` | writes that note into `push-notes.yaml` |
+| pressed clear notes | `--clear-notes` | empties every note in `push-notes.yaml` |
+| pressed create one here | `--init` | writes a new `push-notes.yaml` in the current folder |
+| pressed push, then yes, push | *(no arguments)* | commits and pushes every repo that has a note |
+
+It runs in the folder Claude Code was started in. `push.rb` in turn runs two programs:
+
+- **`git`**, to read each repo's state (`status --porcelain`, `branch --show-current`, `rev-list --count`, `rev-parse`, `diff --cached --name-only`) and, only when you press push, to `fetch origin`, `checkout` the configured branch, `add -A`, `reset` the config file out of the commit, `commit -m <note>` and `push -u origin <branch>`.
+- **`gh`**, only as `gh api user --jq .login`, to check which GitHub account is signed in: the pane shows it, and a push stops if it is not the one the config names.
+
+### What it sends, and where
+
+- **`git fetch` and `git push`** talk to each repo's own `origin` remote, the one you configured in that repo (for example GitHub). A push sends that repo's new commit. They only run when you press push, and `fetch` also runs right before a push.
+- **`gh api user`** sends one request to GitHub's API (`api.github.com/user`), authenticated as your signed-in `gh` account, each time the pane reads the state and before a push. It reads back only your login name.
+- Nothing else leaves your machine. There is no telemetry and no other server.
+
+### What each hook does
+
+- **`session.start`**: registers the `/push-notes` command.
+- **`command.run`** (for `/push-notes`): reads the current state with `--plan-json` and opens the pane.
+- **`ui.render`** (the pane): draws the repos, notes and buttons from that state. The buttons run the commands in the table above.
+- **`tool.call`**: lets every tool call run unchanged. After an `Edit` or `Write` whose file ends in `push-notes.yaml`, if the pane has been opened, it re-reads the state with `--plan-json` so the pane shows the edit. It never blocks, rewrites or delays a tool call beyond that read, and a failed read is ignored.
+
 ## The skill
 
 The plugin ships a `push-with-notes` skill. It tells Claude to commit and push only this way: write the notes into `push-notes.yaml`, dry-run, and push only once you say so.
