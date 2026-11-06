@@ -1,0 +1,6 @@
+{
+  "name": "push-notes",
+  "description": "push several repos from one push-notes.yaml with short lowercase notes as the commit messages",
+  "owner": { "name": "Tyler Thomlinson" },
+  "plugins": [{ "name": "push-notes", "source": "./" }]
+}

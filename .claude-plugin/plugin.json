@@ -1,0 +1,9 @@
+{
+  "name": "push-notes",
+  "version": "0.1.0",
+  "description": "push several repos from one push-notes.yaml, each commit message a short lowercase note and nothing else, with a pane to review and edit before shipping",
+  "author": { "name": "Tyler Thomlinson" },
+  "license": "MIT",
+  "keywords": ["git", "commit", "push", "multi-repo"],
+  "types": "./types/index.d.ts"
+}

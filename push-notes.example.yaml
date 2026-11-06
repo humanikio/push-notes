@@ -1,0 +1,21 @@
+# push notes
+#
+# fill in a note for each repo you want to push, then run /push-notes in claude code
+# to check it and push, or `ruby push.rb --dry` then `ruby push.rb`.
+#
+# a repo with an empty note is skipped.
+# notes are lowercase and simple, a sentence or two.
+# the note is the whole commit message, nothing else gets added.
+# repo paths are relative to this file.
+
+# the github account that pushes. the script stops if gh is signed in as anyone else
+account: your-github-username
+
+repos:
+  - path: ./web
+    branch: main
+    note: ""
+
+  - path: ./api
+    branch: main
+    note: ""
