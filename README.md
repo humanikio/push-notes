@@ -9,12 +9,12 @@ Inside Claude Code, `/push-notes` opens a pane that shows exactly what will ship
 At the prompt of a Claude Code terminal session:
 
 ```
-/plugin install push-notes --marketplace <owner>/<repo>
+/plugin install push-notes --marketplace humanikio/push-notes
 ```
 
 Answer `y` to add the marketplace, then pick a scope (user scope loads it in every session).
 
-From a shell: `claude plugin install push-notes --marketplace <owner>/<repo>`
+From a shell: `claude plugin install push-notes --marketplace humanikio/push-notes`
 
 ## Needs
 
