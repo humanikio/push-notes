@@ -26,6 +26,19 @@ async function refresh($: Engine) {
   await update($, plan, () => JSON.parse(stdout) as Plan)
 }
 
+// a git commit or push typed into Bash, e.g. `git commit -m ..`, `git -C repo push`, `cd x && git push`
+const GIT_COMMIT_OR_PUSH = /(^|[\s;&|(])git(\s+-C\s+\S+)?\s+(commit|push)\b/
+const GH_PR = /(^|[\s;&|(])gh\s+pr\s+(create|merge|edit)\b/
+
+function howToPush(root: string): string {
+  return (
+    'commits and pushes go through the push-with-notes skill. ' +
+    `write a short lowercase note (a sentence or two, nothing else) for each changed repo into push-notes.yaml in the working folder (create it with \`ruby ${root}/bin/push.rb --init\` if there is none), ` +
+    `dry-run with \`ruby ${root}/bin/push.rb --dry\` and show the user, and push with \`ruby ${root}/bin/push.rb\` only once the user says so. ` +
+    'the user can also review and push from /push-notes.'
+  )
+}
+
 function lastLines(text: string, n: number): string {
   return text.trim().split('\n').slice(-n).join('\n')
 }
@@ -36,7 +49,9 @@ async function openPane($: Engine) {
   await $.ui.open({ id: PANE, title: 'Push notes', focus: true, closeOnEscape: true })
 }
 
-export const register: Register = on => {
+export const register: Register = (on, options) => {
+  const enforce = String(options.enforce ?? 'remind')
+
   on('session.start', async ($, e, next) => {
     await $.command.register({
       name: 'push-notes',
@@ -59,6 +74,25 @@ export const register: Register = on => {
       if (shown !== null) await refresh($).catch(() => undefined)
     }
     return ran
+  })
+
+  // keep agents on push notes: remind after a plain git commit or push, or block it outright
+  on('tool.call', { tool: 'Bash' }, async ($, e, next) => {
+    const command = String(e.command ?? '')
+    const isGit = GIT_COMMIT_OR_PUSH.test(command)
+    const isPr = GH_PR.test(command)
+    if (enforce === 'off' || (!isGit && !isPr)) return next(e)
+
+    if (enforce === 'block' && isGit) {
+      return { deny: `push-notes blocked this git commit or push. ${howToPush($.plugin.root)}` }
+    }
+
+    const ran = await next(e)
+    if (typeof ran.deny === 'string') return ran
+    const reminder = isGit
+      ? `push-notes: this commit or push did not go through push notes. ${howToPush($.plugin.root)}`
+      : 'push-notes: pull request titles and bodies are only the note: a few lowercase words for the title, the note as the body, no attribution line. merge with --rebase.'
+    return { ...ran, context: [...(ran.context ?? []), reminder] }
   })
 
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {

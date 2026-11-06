@@ -48,6 +48,24 @@ It is found in this order:
 
 The config holds draft notes, so it is never committed, even when it sits inside a repo.
 
+## Keeping agents on push notes
+
+The `enforce` setting decides what happens when an agent runs `git commit` or `git push` through Claude Code's Bash tool:
+
+| `enforce` | What happens |
+|---|---|
+| `remind` (default) | the command runs, then the agent is told to use push notes next time and keep the message to a short lowercase note |
+| `block` | the command is refused, and the agent is told to write the note into `push-notes.yaml`, dry-run and push through push notes instead |
+| `off` | nothing |
+
+`gh pr create`, `gh pr merge` and `gh pr edit` only ever get a reminder: PR titles and bodies are just the note. Commands you type yourself, and push notes' own script, are never touched.
+
+Set it in `/config` (the push-notes row), or when installing:
+
+```
+claude plugin install push-notes --marketplace humanikio/push-notes --config enforce=block
+```
+
 ## Without the pane
 
 ```
@@ -100,7 +118,8 @@ It runs in the folder Claude Code was started in. `push.rb` in turn runs two pro
 - **`session.start`**: registers the `/push-notes` command.
 - **`command.run`** (for `/push-notes`): reads the current state with `--plan-json` and opens the pane.
 - **`ui.render`** (the pane): draws the repos, notes and buttons from that state. The buttons run the commands in the table above.
-- **`tool.call`**: lets every tool call run unchanged. After an `Edit` or `Write` whose file ends in `push-notes.yaml`, if the pane has been opened, it re-reads the state with `--plan-json` so the pane shows the edit. It never blocks, rewrites or delays a tool call beyond that read, and a failed read is ignored.
+- **`tool.call`** (every tool): lets the call run unchanged. After an `Edit` or `Write` whose file ends in `push-notes.yaml`, if the pane has been opened, it re-reads the state with `--plan-json` so the pane shows the edit. A failed read is ignored.
+- **`tool.call`** (Bash only): looks at the command text for `git commit`, `git push` or `gh pr create/merge/edit`. With `enforce: block` it refuses a `git commit` or `git push` with a message pointing the agent at push notes. Otherwise it lets the command run unchanged and, unless `enforce` is `off`, adds a short reminder that only the agent reads. It runs nothing and sends nothing itself. Any other command passes through untouched.
 
 ## The skill
 

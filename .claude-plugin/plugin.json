@@ -1,6 +1,6 @@
 {
   "name": "push-notes",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "push several repos from one push-notes.yaml, each commit message a short lowercase note and nothing else, with a pane to review and edit before shipping",
   "author": {
     "name": "Tyler Thomlinson"
@@ -11,5 +11,18 @@
     "commit",
     "push",
     "multi-repo"
-  ]
+  ],
+  "userConfig": {
+    "enforce": {
+      "type": "string",
+      "title": "Keep commits on push notes",
+      "description": "What happens when an agent runs git commit or git push in Bash: remind (let it run, then tell the agent to use push notes), block (refuse it and point the agent at push notes), or off.",
+      "default": "remind",
+      "options": [
+        "remind",
+        "block",
+        "off"
+      ]
+    }
+  }
 }
