@@ -54,7 +54,9 @@ export const register: Register = on => {
   on('tool.call', async ($, e, next) => {
     const ran = await next(e)
     if ((e.tool === 'Edit' || e.tool === 'Write') && String(e.file_path ?? '').endsWith('push-notes.yaml')) {
-      if ((await read($, plan)) !== null) await refresh($)
+      // a failed refresh must never turn into a failed tool call: the pane keeps what it had
+      const shown = await read($, plan).catch(() => null)
+      if (shown !== null) await refresh($).catch(() => undefined)
     }
     return ran
   })
