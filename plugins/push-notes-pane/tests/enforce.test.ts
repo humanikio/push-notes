@@ -27,7 +27,7 @@ test('block only reminds on pull requests', { options: { enforce: 'block' } }, a
 
 test('off and unrelated commands pass through untouched', { options: { enforce: 'block' } }, async ($, on) => {
   on('tool.call', () => ran)
-  for (const command of ['git status', 'ruby bin/push.rb --dry', 'git log --grep=commit', 'echo push']) {
+  for (const command of ['git status', 'ruby scripts/push.rb --dry', 'git log --grep=commit', 'echo push']) {
     const out = await $.tool.call({ tool: 'Bash', command })
     expect(out.deny).toBeUndefined()
     expect(out.context ?? []).toEqual([])

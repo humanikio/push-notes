@@ -4,16 +4,16 @@ import type { EngineInterface, Register } from 'claude-code'
 import type { Plan, RepoPlan } from '../types'
 
 const PANE = 'push-notes'
-const plan = atom({ plugin: 'push-notes', key: 'plan' } as const, null, { shape: 'plan-2' })
-const status = atom({ plugin: 'push-notes', key: 'status' } as const, '')
-const confirming = atom({ plugin: 'push-notes', key: 'confirming' } as const, false)
-const busy = atom({ plugin: 'push-notes', key: 'busy' } as const, false)
+const plan = atom({ plugin: 'push-notes-pane', key: 'plan' } as const, null, { shape: 'plan-2' })
+const status = atom({ plugin: 'push-notes-pane', key: 'status' } as const, '')
+const confirming = atom({ plugin: 'push-notes-pane', key: 'confirming' } as const, false)
+const busy = atom({ plugin: 'push-notes-pane', key: 'busy' } as const, false)
 
 type Engine = EngineInterface
 
 // runs the plugin's script from the session's folder, so it finds push-notes.yaml there or above
 async function script($: Engine, args: string[], timeoutMs = 60_000) {
-  const argv = ['/usr/bin/env', 'ruby', `${$.plugin.root}/bin/push.rb`, ...args]
+  const argv = ['/usr/bin/env', 'ruby', `${$.plugin.root}/scripts/push.rb`, ...args]
   return $.process.run(argv, { timeoutMs })
 }
 
@@ -33,8 +33,8 @@ const GH_PR = /(^|[\s;&|(])gh\s+pr\s+(create|merge|edit)\b/
 function howToPush(root: string): string {
   return (
     'commits and pushes go through the push-with-notes skill. ' +
-    `write a short lowercase note (a sentence or two, nothing else) for each changed repo into push-notes.yaml in the working folder (create it with \`ruby ${root}/bin/push.rb --init\` if there is none), ` +
-    `dry-run with \`ruby ${root}/bin/push.rb --dry\` and show the user, and push with \`ruby ${root}/bin/push.rb\` only once the user says so. ` +
+    `write a short lowercase note (a sentence or two, nothing else) for each changed repo into push-notes.yaml in the working folder (create it with \`ruby ${root}/scripts/push.rb --init\` if there is none), ` +
+    `dry-run with \`ruby ${root}/scripts/push.rb --dry\` and show the user, and push with \`ruby ${root}/scripts/push.rb\` only once the user says so. ` +
     'the user can also review and push from /push-notes.'
   )
 }

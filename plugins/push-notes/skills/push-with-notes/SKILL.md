@@ -5,21 +5,25 @@ description: How to commit and push with the push-notes plugin. Use for any git 
 
 # Pushing with push notes
 
-Every commit and push goes through `push-notes.yaml` and this plugin's `bin/push.rb`.
+Every commit and push goes through `push-notes.yaml` and this plugin's `scripts/push.rb`.
+
+`<plugin>` below is this plugin's folder: two folders up from this skill's own folder (`<plugin>/skills/push-with-notes/`).
+
+If the `push-notes-pane` plugin is installed, `/push-notes` opens a pane where the user can review every repo, branch and note and push from there.
 
 ## Find or set up the config
 
 The script looks for `$PUSH_NOTES_CONFIG` first, then `push-notes.yaml` in the working folder or the nearest parent folder that has one.
 
 - **If it exists, use it.** Read it to see which repos it lists.
-- **If it does not,** create it in the working folder: `ruby <plugin>/bin/push.rb --init` (or the user presses **create one here** in `/push-notes`). It lists every git repo in the folder and the current gh account. Show the user what it created.
+- **If it does not,** create it in the working folder: `ruby <plugin>/scripts/push.rb --init` (or the user presses **create one here** in the `/push-notes` pane, if installed). It lists every git repo in the folder and the current gh account. Show the user what it created.
 - A repo that changed but is not listed: add an entry with its `path` relative to the config file, its `branch` and `note: ""`.
 
 ## Steps
 
 1. Write the `note` for each repo that changed. Leave the others as `""`.
-2. Dry run, and show the user the output: `ruby <plugin>/bin/push.rb --dry`. Or tell them to open `/push-notes` and look.
-3. Push only once the user says to: `ruby <plugin>/bin/push.rb` (or they press push in the pane). `--only <repo>` pushes one.
+2. Dry run, and show the user the output: `ruby <plugin>/scripts/push.rb --dry`. Or tell them to open `/push-notes` and look.
+3. Push only once the user says to: `ruby <plugin>/scripts/push.rb` (or they press push in the pane). `--only <repo>` pushes one.
 4. Afterwards, clear the notes (`--clear-notes`, or **clear notes** in the pane) so the next push does not reuse them.
 
 Do not run `git commit` or `git push` by hand.

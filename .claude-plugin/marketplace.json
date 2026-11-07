@@ -1,6 +1,19 @@
 {
   "name": "push-notes",
   "description": "push several repos from one push-notes.yaml with short lowercase notes as the commit messages",
-  "owner": { "name": "Tyler Thomlinson" },
-  "plugins": [{ "name": "push-notes", "source": "./" }]
+  "owner": {
+    "name": "Tyler Thomlinson"
+  },
+  "plugins": [
+    {
+      "name": "push-notes",
+      "source": "./plugins/push-notes",
+      "description": "the skill and the script: note-only commits from push-notes.yaml"
+    },
+    {
+      "name": "push-notes-pane",
+      "source": "./plugins/push-notes-pane",
+      "description": "the /push-notes review pane and the remind or block hook for agent commits"
+    }
+  ]
 }

@@ -21,7 +21,7 @@ export type Plan = {
 
 declare module 'claude-code' {
   interface PluginState {
-    'push-notes': {
+    'push-notes-pane': {
       plan: Shaped<Plan | null>
       status: string
       confirming: boolean

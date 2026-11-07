@@ -1,7 +1,7 @@
 {
-  "name": "push-notes",
-  "version": "0.2.0",
-  "description": "push several repos from one push-notes.yaml, each commit message a short lowercase note and nothing else, with a pane to review and edit before shipping",
+  "name": "push-notes-pane",
+  "version": "0.3.0",
+  "description": "a /push-notes pane to review repos, branches and notes before pushing, and an optional hook that reminds or blocks agents that commit outside push notes. pairs with the push-notes plugin.",
   "author": {
     "name": "Tyler Thomlinson"
   },
@@ -10,7 +10,7 @@
     "git",
     "commit",
     "push",
-    "multi-repo"
+    "pane"
   ],
   "userConfig": {
     "enforce": {
