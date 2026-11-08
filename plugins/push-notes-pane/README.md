@@ -2,7 +2,7 @@
 
 A pane in Claude Code for [push-notes](../push-notes). `/push-notes` shows exactly what will ship: each repo, the branch, the changed files and the note. You can edit the notes in place and push with a confirm step. It also ships an optional hook that reminds or blocks agents that commit outside push notes.
 
-Install it alongside `push-notes`, which carries the skill.
+Install it alongside `push-notes`, which carries the skill. When this plugin is installed, the skill does its pushes through this plugin's script.
 
 ## Install
 
@@ -29,7 +29,19 @@ Answer `y` to add the marketplace if asked, then pick a scope.
 
 Keys in the pane: `p` push, `r` refresh, `c` clear notes, `x` or Esc close.
 
-The config format and the safety checks are the same as push-notes'; see [its README](../push-notes/README.md).
+The config format is the same as push-notes'; see [its README](../push-notes/README.md).
+
+## The script
+
+`scripts/push.rb` does the whole flow with the checks in code: it stops on the wrong `gh` account, refuses `.env` files, never commits `push-notes.yaml`, stops if the remote has moved, and lowercases notes and strips trailer lines such as `Co-Authored-By`. You can run it yourself:
+
+```
+ruby scripts/push.rb --init        # create push-notes.yaml here, listing the git repos in this folder
+ruby scripts/push.rb --dry         # show what would happen
+ruby scripts/push.rb               # commit and push every repo with a note
+ruby scripts/push.rb --only api    # just one repo
+ruby scripts/push.rb --clear-notes # empty every note
+```
 
 ## Keeping agents on push notes
 
@@ -54,7 +66,7 @@ claude plugin install push-notes-pane --marketplace humanikio/push-notes --confi
 
 ### Programs the mod runs, and why
 
-The pane runs one program: this plugin's own copy of the push-notes script, through `ruby` found on your PATH. The full command is
+The pane runs one program: this plugin's script, `scripts/push.rb`, through `ruby` found on your PATH. The full command is
 
 ```
 /usr/bin/env ruby <plugin folder>/scripts/push.rb <mode>

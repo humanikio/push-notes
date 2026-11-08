@@ -8,12 +8,12 @@
     {
       "name": "push-notes",
       "source": "./plugins/push-notes",
-      "description": "the skill and the script: note-only commits from push-notes.yaml"
+      "description": "the skill: note-only commits from push-notes.yaml, in Markdown only"
     },
     {
       "name": "push-notes-pane",
       "source": "./plugins/push-notes-pane",
-      "description": "the /push-notes review pane and the remind or block hook for agent commits"
+      "description": "the push.rb script, the /push-notes review pane and the remind or block hook for agent commits"
     }
   ]
 }

@@ -6,8 +6,8 @@ This repo is a Claude Code marketplace with two plugins:
 
 | Plugin | What it is |
 |---|---|
-| [`push-notes`](plugins/push-notes) | the skill and the script. Claude commits and pushes only through `push-notes.yaml`, with note-only messages. No hooks. |
-| [`push-notes-pane`](plugins/push-notes-pane) | a `/push-notes` pane to review and push, and an optional hook that reminds or blocks agents that commit outside push notes |
+| [`push-notes`](plugins/push-notes) | the skill, in Markdown only. Claude commits and pushes through `push-notes.yaml`, with note-only messages. No hooks, no scripts. |
+| [`push-notes-pane`](plugins/push-notes-pane) | the `push.rb` script, a `/push-notes` pane to review and push, and an optional hook that reminds or blocks agents that commit outside push notes |
 
 ## Install
 
