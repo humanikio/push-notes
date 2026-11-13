@@ -1,6 +1,6 @@
 {
   "name": "push-notes",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "push several repos from one push-notes.yaml, each commit message a short lowercase note and nothing else. a skill only, no hooks or scripts.",
   "author": {
     "name": "Tyler Thomlinson"

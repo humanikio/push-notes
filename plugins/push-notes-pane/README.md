@@ -36,7 +36,8 @@ The config format is the same as push-notes'; see [its README](../push-notes/REA
 `scripts/push.rb` does the whole flow with the checks in code: it stops on the wrong `gh` account, refuses `.env` files, never commits `push-notes.yaml`, stops if the remote has moved, and lowercases notes and strips trailer lines such as `Co-Authored-By`. You can run it yourself:
 
 ```
-ruby scripts/push.rb --init        # create push-notes.yaml here, listing the git repos in this folder
+ruby scripts/push.rb --init        # create push-notes.yaml here, listing the git repos in this folder (up to 3 levels down)
+ruby scripts/push.rb --sync        # add repos cloned since, keeping every note
 ruby scripts/push.rb --dry         # show what would happen
 ruby scripts/push.rb               # commit and push every repo with a note
 ruby scripts/push.rb --only api    # just one repo

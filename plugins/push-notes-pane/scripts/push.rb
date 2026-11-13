@@ -4,6 +4,8 @@
 #   ruby push.rb --dry                 say what it would do, change nothing
 #   ruby push.rb --only NAME           just that repo (folder name)
 #   ruby push.rb --init                create push-notes.yaml here, listing the git repos in this folder
+#                                      and the folders under it (up to 3 levels down)
+#   ruby push.rb --sync                add repos that are not in push-notes.yaml yet, keeping every note
 #   ruby push.rb --plan-json           the state of every repo as json (read only)
 #   ruby push.rb --set-note NAME TEXT
 #   ruby push.rb --clear-notes
@@ -39,6 +41,7 @@ mode = :dry if args.delete('--dry')
 mode = :plan if args.delete('--plan-json')
 mode = :clear if args.delete('--clear-notes')
 mode = :init if args.delete('--init')
+mode = :sync if args.delete('--sync')
 only = nil
 if (i = args.index('--only'))
   only = args[i + 1]
@@ -114,22 +117,67 @@ def env_file?(path)
   File.basename(path.to_s) =~ /\A\.env(\..*)?\z/ && path.to_s !~ /\.example\z/
 end
 
+# the git repos at or under a folder: the folder itself if it is a repo, then any folder
+# up to MAX_DEPTH levels down that is one. a repo found below the top is not searched
+# inside, and hidden folders and node_modules are skipped.
+MAX_DEPTH = 3
+SKIP_DIRS = %w[node_modules vendor].freeze
+
+def git_repo?(dir)
+  File.exist?(File.join(dir, '.git'))
+end
+
+def find_repos(here)
+  found = []
+  found << '.' if git_repo?(here)
+  walk = lambda do |dir, rel, depth|
+    Dir.children(dir).sort.each do |c|
+      next if c.start_with?('.') || SKIP_DIRS.include?(c)
+      full = File.join(dir, c)
+      next if !File.directory?(full) || File.symlink?(full)
+      path = rel.empty? ? c : "#{rel}/#{c}"
+      if git_repo?(full)
+        found << "./#{path}"
+      elsif depth < MAX_DEPTH
+        walk.call(full, path, depth + 1)
+      end
+    end
+  end
+  walk.call(here, '', 1)
+  found
+end
+
+def repo_entry(here, path)
+  branch, = run(%w[git branch --show-current], dir: File.join(here, path))
+  { 'path' => path, 'branch' => branch.empty? ? 'main' : branch, 'note' => '' }
+end
+
 if mode == :init
   abort "#{CONFIG_PATH} already exists" if File.exist?(CONFIG_PATH)
   here = Dir.pwd
-  found = []
-  found << '.' if File.directory?(File.join(here, '.git'))
-  Dir.children(here).sort.each do |c|
-    found << "./#{c}" if File.directory?(File.join(here, c, '.git'))
-  end
-  abort 'no git repos in this folder or directly under it' if found.empty?
+  found = find_repos(here)
+  abort "no git repos in this folder or the folders under it" if found.empty?
   who, ok = run(%w[gh api user --jq .login])
-  repos = found.map do |path|
-    branch, = run(%w[git branch --show-current], dir: File.join(here, path))
-    { 'path' => path, 'branch' => branch.empty? ? 'main' : branch, 'note' => '' }
-  end
+  repos = found.map { |path| repo_entry(here, path) }
   write_config('account' => ok ? who : '', 'repos' => repos)
   puts "created #{CONFIG_PATH} with #{repos.size} repo#{repos.size == 1 ? '' : 's'}"
+  exit
+end
+
+if mode == :sync
+  config = load_config
+  config['repos'] ||= []
+  here = File.dirname(CONFIG_PATH)
+  known = config['repos'].map { |r| repo_dir(r) }
+  added = find_repos(here).reject { |path| known.include?(File.expand_path(path, here)) }
+  if added.empty?
+    puts "#{CONFIG_PATH} already lists every repo"
+    exit
+  end
+  added.each { |path| config['repos'] << repo_entry(here, path) }
+  write_config(config)
+  puts "added #{added.size} repo#{added.size == 1 ? '' : 's'} to #{CONFIG_PATH}:"
+  added.each { |path| puts "  #{path}" }
   exit
 end
 

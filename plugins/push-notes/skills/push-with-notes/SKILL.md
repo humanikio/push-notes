@@ -16,7 +16,8 @@ ls ~/.claude/plugins/marketplaces/*/plugins/push-notes-pane/scripts/push.rb 2>/d
 ```
 
 - **If it prints a path, use that script** and skip "Doing it by hand":
-  - `ruby <script> --init` creates `push-notes.yaml` in the working folder
+  - `ruby <script> --init` creates `push-notes.yaml` in the working folder, listing the repos in it and up to 3 levels down
+  - `ruby <script> --sync` adds repos that are not listed yet (cloned since), keeping every note
   - `ruby <script> --dry` shows what would happen; show the user
   - `ruby <script>` pushes once the user says so; `--only <repo>` pushes one repo
   - `ruby <script> --clear-notes` empties the notes afterwards
@@ -29,8 +30,8 @@ ls ~/.claude/plugins/marketplaces/*/plugins/push-notes-pane/scripts/push.rb 2>/d
 Look for `$PUSH_NOTES_CONFIG` first, then `push-notes.yaml` in the working folder or the nearest parent folder that has one.
 
 - **If it exists, use it.**
-- **If it does not,** create `push-notes.yaml` in the working folder, listing every git repo in it (the folder itself if it is a repo, and each folder directly under it that is one), each on its current branch. Put the signed-in account (`gh api user --jq .login`) as `account`. Show the user what you created.
-- A changed repo that is not listed: add it with its `path` relative to the config file, its `branch` and `note: ""`.
+- **If it does not,** create `push-notes.yaml` in the working folder, listing every git repo in it (the folder itself if it is a repo, and any folder up to 3 levels under it that is one, without looking inside a repo it found, in hidden folders or in `node_modules`), each on its current branch. Put the signed-in account (`gh api user --jq .login`) as `account`. Show the user what you created.
+- A changed repo that is not listed: run `--sync` if you have the script, or add it with its `path` relative to the config file, its `branch` and `note: ""`.
 
 The format:
 

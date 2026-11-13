@@ -1,6 +1,6 @@
 {
   "name": "push-notes-pane",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "a /push-notes pane to review repos, branches and notes before pushing, and an optional hook that reminds or blocks agents that commit outside push notes. pairs with the push-notes plugin.",
   "author": {
     "name": "Tyler Thomlinson"
